@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Authors>Ihar Yakimush</Authors>
+    <Description>Register multiple instances of IConnection in service collection. Maintain 1 connection per application and 1 model per thread approach.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/IharYakimush/RabbitMq.DependencyInjection</PackageProjectUrl>
+    <PackageId>RabbitMq.DependencyInjection</PackageId>
+    <PackageTags>rabbitmq dependency-injection</PackageTags>
+    <Product>RabbitMq.DependencyInjection</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="3.1.10" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

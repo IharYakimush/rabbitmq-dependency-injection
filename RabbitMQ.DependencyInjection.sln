@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RabbitMq.DependencyInjection", "RabbitMq.DependencyInjection\RabbitMq.DependencyInjection.csproj", "{A572397B-DE39-4876-BE4D-30B37B406F17}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF2B8A86-4F9B-471E-A08C-DE6DB4CDAF6E}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A572397B-DE39-4876-BE4D-30B37B406F17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A572397B-DE39-4876-BE4D-30B37B406F17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A572397B-DE39-4876-BE4D-30B37B406F17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A572397B-DE39-4876-BE4D-30B37B406F17}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {754CB80B-B846-48F7-A86D-C8699662517F}
+	EndGlobalSection
+EndGlobal
