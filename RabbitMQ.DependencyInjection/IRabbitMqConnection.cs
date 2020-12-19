@@ -5,8 +5,8 @@ using System.Text;
 
 namespace RabbitMq.DependencyInjection
 {
-    public interface IRabbitMqModelFor<TTarget>
+    public interface IRabbitMqConnection<TConnection>
     {
-        void Execute(Action<IModel> action);
+        IConnection Connection { get; }
     }
 }

@@ -8,9 +8,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF2B8A86-4F9B-471E-A08C-DE6DB4CDAF6E}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		docker-compose.yaml = docker-compose.yaml
 		LICENSE = LICENSE
+		localenv.ps1 = localenv.ps1
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{18C125F9-9CA2-4CDB-8A46-F6C5FD5EBD57}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +26,10 @@ Global
 		{A572397B-DE39-4876-BE4D-30B37B406F17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A572397B-DE39-4876-BE4D-30B37B406F17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A572397B-DE39-4876-BE4D-30B37B406F17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18C125F9-9CA2-4CDB-8A46-F6C5FD5EBD57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18C125F9-9CA2-4CDB-8A46-F6C5FD5EBD57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18C125F9-9CA2-4CDB-8A46-F6C5FD5EBD57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18C125F9-9CA2-4CDB-8A46-F6C5FD5EBD57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
