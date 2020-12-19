@@ -15,7 +15,7 @@ namespace RabbitMQ.DependencyInjection
             public static LogLevel BlockedEventLevel = LogLevel.Warning;
 
             public static EventId UnblockedEventId = new EventId(103, "ConnectionUnblocked");
-            public static LogLevel UnblockedEventLevel = LogLevel.Information;            
+            public static LogLevel UnblockedEventLevel = LogLevel.Information;
 
             public static EventId ShutdownEventId = new EventId(104, "ConnectionShutdown");
             public static LogLevel ShutdownEventLevel = LogLevel.Information;
@@ -32,7 +32,7 @@ namespace RabbitMQ.DependencyInjection
             public static LogLevel ReturnEventLevel = LogLevel.Debug;
 
             public static EventId BootstrapErrorEventId = new EventId(203, "ModelBootstrapError");
-            public static LogLevel BootstrapErrorEventLevel = LogLevel.Error;            
+            public static LogLevel BootstrapErrorEventLevel = LogLevel.Error;
         }
     }
 }

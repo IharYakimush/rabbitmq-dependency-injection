@@ -1,16 +1,15 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RabbitMQ.DependencyInjection;
 using RabbitMQ.Client;
+using RabbitMQ.DependencyInjection;
 using System;
-
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sample
 {
-    class Producer : BackgroundService
+    internal class Producer : BackgroundService
     {
         private readonly RabbitMqModelsObjectPool<RabbitMqSetup.Exc1> excObjectPool;
         private readonly ILogger<Producer> logger;

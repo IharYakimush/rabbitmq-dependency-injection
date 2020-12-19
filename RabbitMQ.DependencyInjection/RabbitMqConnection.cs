@@ -9,7 +9,7 @@ namespace RabbitMQ.DependencyInjection
 
         public RabbitMqConnection(IConnection connection)
         {
-            this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));            
+            this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
         public IConnection Connection { get; }

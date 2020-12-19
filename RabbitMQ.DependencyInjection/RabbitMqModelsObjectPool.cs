@@ -8,6 +8,6 @@ namespace RabbitMQ.DependencyInjection
         public RabbitMqModelsObjectPool(IPooledObjectPolicy<IModel> policy, int maximumRetained) : base(policy, maximumRetained)
         {
 
-        }                
+        }
     }
 }

@@ -4,7 +4,7 @@ name: NuGet
 on:
   push:
     branches:
-      - nuget # Default release branch
+      - nuget # Default release branch    
 jobs:
   publish:
     name: build, pack & publish

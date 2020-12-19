@@ -5,7 +5,7 @@ using System;
 
 namespace RabbitMQ.DependencyInjection
 {
-    internal sealed class ModelPoolPolicy<TModel,TConnection> : IPooledObjectPolicy<IModel>
+    internal sealed class ModelPoolPolicy<TModel, TConnection> : IPooledObjectPolicy<IModel>
     {
         private readonly IRabbitMqConnection<TConnection> connectionProvider;
         private readonly Action<IModel> bootstrapAction;
@@ -27,7 +27,7 @@ namespace RabbitMQ.DependencyInjection
 
             if (this.logger != null && this.logger.IsEnabled(Logging.Model.CreatedEventLevel))
             {
-                this.logger.Log(Logging.Model.CreatedEventLevel, Logging.Model.CreatedEventId, "Model of type {TypeParam} created", typeof(TModel));               
+                this.logger.Log(Logging.Model.CreatedEventLevel, Logging.Model.CreatedEventId, "Model of type {TypeParam} created", typeof(TModel));
             }
 
             try

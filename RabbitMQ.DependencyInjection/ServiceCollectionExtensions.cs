@@ -18,8 +18,8 @@ namespace RabbitMQ.DependencyInjection
         /// <param name="lifetime">Connection lifetime to control when it will be disposed. Recommended value <see cref="ServiceLifetime.Singleton"/> to keep one connection open during all application lifetime.</param>
         /// <returns></returns>
         public static IServiceCollection AddRabbitMqConnection<TConnection>(
-            this IServiceCollection services, 
-            Action<IServiceProvider,ConnectionFactory> setupAction, 
+            this IServiceCollection services,
+            Action<IServiceProvider, ConnectionFactory> setupAction,
             ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
             if (services is null)
@@ -32,11 +32,11 @@ namespace RabbitMQ.DependencyInjection
                 throw new ArgumentNullException(nameof(setupAction));
             }
 
-            if (services.Any(d=>d.ServiceType == typeof(IRabbitMqConnection<TConnection>)))
+            if (services.Any(d => d.ServiceType == typeof(IRabbitMqConnection<TConnection>)))
             {
                 throw new InvalidOperationException($"Connection with type param {typeof(TConnection)} already added");
             }
-            
+
             services.Add(new ServiceDescriptor(
                 typeof(IRabbitMqConnection<TConnection>), sp =>
                  {
@@ -91,7 +91,7 @@ namespace RabbitMQ.DependencyInjection
                      return new RabbitMqConnection<TConnection>(result);
                  },
                 lifetime));
-            
+
             return services;
         }
 
@@ -104,8 +104,8 @@ namespace RabbitMQ.DependencyInjection
         /// <param name="modelBootstrapAction">Model bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.</param>
         /// <param name="modelsPoolMaxRetained">Models ObjectPool maximum retained items count. Default 1. Increase this value in case of multi-threading scenarious to improve model reuse.</param>
         /// <returns></returns>
-        public static IServiceCollection AddRabbitMqModel<TModel,TConnection>(
-            this IServiceCollection services, 
+        public static IServiceCollection AddRabbitMqModel<TModel, TConnection>(
+            this IServiceCollection services,
             Action<IServiceProvider, IModel> modelBootstrapAction,
             int modelsPoolMaxRetained = 1)
         {
@@ -134,7 +134,7 @@ namespace RabbitMQ.DependencyInjection
             services.Add(new ServiceDescriptor(typeof(RabbitMqModelsObjectPool<TModel>), sp =>
             {
                 var policy = new ModelPoolPolicy<TModel, TConnection>(
-                    sp.GetRequiredService<IRabbitMqConnection<TConnection>>(), 
+                    sp.GetRequiredService<IRabbitMqConnection<TConnection>>(),
                     sp.GetService<ILoggerFactory>(),
                     (m) => modelBootstrapAction(sp, m));
 
@@ -144,6 +144,6 @@ namespace RabbitMQ.DependencyInjection
             services.AddTransient<IRabbitMqModel<TModel>, RabbitMqModel<TModel>>();
 
             return services;
-        }       
+        }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RabbitMQ.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.DependencyInjection;
 using System;
 using System.Text;
 using System.Threading;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Sample
 {
-    class Consumer : IHostedService
+    internal class Consumer : IHostedService
     {
         private readonly IRabbitMqModel<RabbitMqSetup.Queue1> queue;
         private readonly ILogger<Consumer> logger;

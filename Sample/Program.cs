@@ -1,14 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RabbitMQ.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.DependencyInjection;
 
 namespace Sample
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             new HostBuilder()
                 .ConfigureLogging((ILoggingBuilder b) =>
@@ -35,7 +35,7 @@ namespace Sample
                     services.AddRabbitMqModel<RabbitMqSetup.Queue1, RabbitMqSetup.Connection1>((s, m) =>
                     {
                         m.QueueDeclare(RabbitMqSetup.Queue1.Name);
-                        m.QueueBind(RabbitMqSetup.Queue1.Name, RabbitMqSetup.Exc1.Name, "#");                        
+                        m.QueueBind(RabbitMqSetup.Queue1.Name, RabbitMqSetup.Exc1.Name, "#");
                     });
 
                     services.AddHostedService<Producer>();

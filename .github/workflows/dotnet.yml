@@ -3,8 +3,16 @@ name: .NET
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+    - '**.md'
+    - '**.ps1'
+    - '**.yaml'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+    - '**.md'
+    - '**.ps1'
+    - '**.yaml'
 
 jobs:
   build:
