@@ -18,10 +18,8 @@ jobs:
       with:
         dotnet-version: 3.1.301
     - name: LS1
-      run: ls
+      run: ls /bin
     - name: LS2
       run: ls /
-    - name: Restore dependencies
-      run: dotnet restore RabbitMQ.DependencyInjection/RabbitMQ.DependencyInjection.csproj
     - name: Build
-      run: dotnet build --no-restore RabbitMQ.DependencyInjection/RabbitMQ.DependencyInjection.csproj
+      run: dotnet build RabbitMQ.DependencyInjection/RabbitMQ.DependencyInjection.csproj --configuration release
