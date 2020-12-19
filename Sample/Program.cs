@@ -31,7 +31,7 @@ namespace Sample
 
                     services.AddRabbitMqModel<RabbitMqSetup.Exc1, RabbitMqSetup.Connection1>((s, m) =>
                     {
-                        m.ExchangeDeclare(RabbitMqSetup.Exc1.Name, ExchangeType.Topic, false, true, new Dictionary<string, object>());
+                        m.ExchangeDeclare(RabbitMqSetup.Exc1.Name, ExchangeType.Topic, false, true, null);
                     });
 
                     services.AddRabbitMqModel<RabbitMqSetup.Queue1, RabbitMqSetup.Connection1>((s, m) =>

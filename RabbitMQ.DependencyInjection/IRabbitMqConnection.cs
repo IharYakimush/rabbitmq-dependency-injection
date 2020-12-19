@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace RabbitMq.DependencyInjection
+namespace RabbitMQ.DependencyInjection
 {
     public interface IRabbitMqConnection<TConnection>
     {

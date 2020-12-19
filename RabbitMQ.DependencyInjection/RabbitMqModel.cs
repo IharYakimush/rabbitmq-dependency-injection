@@ -1,7 +1,7 @@
 ﻿using RabbitMQ.Client;
 using System;
 
-namespace RabbitMq.DependencyInjection
+namespace RabbitMQ.DependencyInjection
 {
     internal sealed class RabbitMqModel<TModel> : IRabbitMqModel<TModel>, IDisposable
     {

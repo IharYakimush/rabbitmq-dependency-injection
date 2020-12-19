@@ -1,7 +1,8 @@
 # RabbitMQ.DependencyInjection
-###1. Register one or more RabbitMq connections. 
+
+### 1. Register one or more RabbitMq connections. 
 Use type params to distinguish different instances. By default connection has recommended lifetime Singleton, but it can be configured differently.
-###2. Register one or more RabbitMq models. 
+### 2. Register one or more RabbitMq models. 
 Model registration required 2 type params. First to be able to inject different models to your classes. Second to bind model to connection. Define bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.
 
 ```
@@ -26,7 +27,7 @@ static void Main(string[] args)
 
         services.AddRabbitMqModel<RabbitMqSetup.Exc1, RabbitMqSetup.Connection1>((s, m) =>
         {
-            m.ExchangeDeclare(RabbitMqSetup.Exc1.Name, ExchangeType.Topic, false, true, new Dictionary<string, object>());
+            m.ExchangeDeclare(RabbitMqSetup.Exc1.Name, ExchangeType.Topic, false, true, null);
         });
 
         services.AddRabbitMqModel<RabbitMqSetup.Queue1, RabbitMqSetup.Connection1>((s, m) =>
@@ -60,7 +61,7 @@ public static class RabbitMqSetup
     }
 }
 ```
-###3. First option of model usage
+### 3. First option of model usage
 Inject `RabbitMqModelsObjectPool<TModel>` class. It is an ObjectPool that can be used to get and return IModel instance. It is created with same service lifetime as connection. Sample of message producer with this approach:
 ```
 class Producer : BackgroundService
@@ -97,7 +98,7 @@ class Producer : BackgroundService
     }
 }
 ```
-###4. Second option of model usage
+### 4. Second option of model usage
 Inject `IRabbitMqModel<TModel>` interface. It is registered in container with Transient lifetime and when needed created from same ObjectPool described in section 3. Don't dispose model in your code to allow it returning to object pool automatically. Sample of message consumer with this approach:
 ```
 class Consumer : BackgroundService
@@ -139,9 +140,10 @@ class Consumer : BackgroundService
 ```
 # Logging
 If `ILoggerFactory` available in container following events will be logged. You can change default logging category and events level using `RabbitMq.DependencyInjection.Logging` class.
-###Default events
-Catgory | Event Name | Log Level | Comments
---- | --- | ---
+### Default events
+
+| Catgory | Event Name | Log Level | Comments |
+|-------- | ---------- | ----------| ---------|
 RabbitMq.Connection | ConnectionCreated | Information | - |
 RabbitMq.Connection | ConnectionBlocked | Information | - |
 
@@ -170,4 +172,4 @@ dbug: RabbitMq.Model[202]
 info: RabbitMq.Connection[104]
       Connection sample1 of type Sample.RabbitMqSetup+Connection1 shutdown. Application 200 Connection close forced (null)
 ```
-#NuGet
+# NuGet

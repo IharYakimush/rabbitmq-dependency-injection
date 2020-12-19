@@ -1,7 +1,7 @@
 ﻿using RabbitMQ.Client;
 using System;
 
-namespace RabbitMq.DependencyInjection
+namespace RabbitMQ.DependencyInjection
 {
     class RabbitMqConnection<TConnection> : IRabbitMqConnection<TConnection>, IDisposable
     {

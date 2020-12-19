@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RabbitMq.DependencyInjection\RabbitMq.DependencyInjection.csproj" />
+    <ProjectReference Include="..\RabbitMq.DependencyInjection\RabbitMQ.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

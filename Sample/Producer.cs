@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using RabbitMq.DependencyInjection;
+using RabbitMQ.DependencyInjection;
 using RabbitMQ.Client;
 using System;
 

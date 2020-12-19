@@ -3,7 +3,7 @@ using Microsoft.Extensions.ObjectPool;
 using RabbitMQ.Client;
 using System;
 
-namespace RabbitMq.DependencyInjection
+namespace RabbitMQ.DependencyInjection
 {
     internal sealed class ModelPoolPolicy<TModel,TConnection> : IPooledObjectPolicy<IModel>
     {

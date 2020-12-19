@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ObjectPool;
-using RabbitMq.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Linq;
-using System.Threading;
 
 namespace RabbitMQ.DependencyInjection
 {
@@ -39,7 +36,7 @@ namespace RabbitMQ.DependencyInjection
             {
                 throw new InvalidOperationException($"Connection with type param {typeof(TConnection)} already added");
             }
-
+            
             services.Add(new ServiceDescriptor(
                 typeof(IRabbitMqConnection<TConnection>), sp =>
                  {
