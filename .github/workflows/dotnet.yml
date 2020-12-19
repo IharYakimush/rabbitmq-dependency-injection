@@ -17,9 +17,5 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: LS1
-      run: ls /bin
-    - name: LS2
-      run: ls /
     - name: Build
-      run: dotnet build RabbitMQ.DependencyInjection/RabbitMQ.DependencyInjection.csproj --configuration release
+      run: dotnet build
