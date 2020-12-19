@@ -3,7 +3,7 @@ using System;
 
 namespace RabbitMQ.DependencyInjection
 {
-    class RabbitMqConnection<TConnection> : IRabbitMqConnection<TConnection>, IDisposable
+    internal sealed class RabbitMqConnection<TConnection> : IRabbitMqConnection<TConnection>, IDisposable
     {
         private bool disposedValue;
 
@@ -14,7 +14,7 @@ namespace RabbitMQ.DependencyInjection
 
         public IConnection Connection { get; }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
