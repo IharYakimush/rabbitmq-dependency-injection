@@ -6,7 +6,7 @@ namespace RabbitMQ.DependencyInjection
     {
         public static class Connection
         {
-            public static string CategoryName = "RabbitMq.Connection";
+            public static string CategoryName = "RabbitMQ.Connection";
 
             public static EventId CreatedEventId = new EventId(101, "ConnectionCreated");
             public static LogLevel CreatedEventLevel = LogLevel.Information;
@@ -14,7 +14,7 @@ namespace RabbitMQ.DependencyInjection
             public static EventId BlockedEventId = new EventId(102, "ConnectionBlocked");
             public static LogLevel BlockedEventLevel = LogLevel.Warning;
 
-            public static EventId UnblockedEventId = new EventId(103, "ConnectionBlocked");
+            public static EventId UnblockedEventId = new EventId(103, "ConnectionUnblocked");
             public static LogLevel UnblockedEventLevel = LogLevel.Information;            
 
             public static EventId ShutdownEventId = new EventId(104, "ConnectionShutdown");
@@ -23,7 +23,7 @@ namespace RabbitMQ.DependencyInjection
 
         public static class Model
         {
-            public static string CategoryName = "RabbitMq.Model";
+            public static string CategoryName = "RabbitMQ.Model";
 
             public static EventId CreatedEventId = new EventId(201, "ModelCreated");
             public static LogLevel CreatedEventLevel = LogLevel.Debug;

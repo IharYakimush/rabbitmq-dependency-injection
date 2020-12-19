@@ -101,33 +101,35 @@ class Producer : BackgroundService
 ### 4. Second option of model usage
 Inject `IRabbitMqModel<TModel>` interface. It is registered in container with Transient lifetime and when needed created from same ObjectPool described in section 3. Don't dispose model in your code to allow it returning to object pool automatically. Sample of message consumer with this approach:
 ```
-class Consumer : BackgroundService
+class Consumer : IHostedService
 {
     private readonly IRabbitMqModel<RabbitMqSetup.Queue1> queue;
     private readonly ILogger<Consumer> logger;
+    private string tag = null;
 
     public Consumer(IRabbitMqModel<RabbitMqSetup.Queue1> queue, ILogger<Consumer> logger)
     {
         this.queue = queue ?? throw new ArgumentNullException(nameof(queue));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.queue.Model);
         consumer.Received += ConsumerReceived;
-        string tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
+        this.tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
 
-        while (!stoppingToken.IsCancellationRequested)
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        if (this.queue.Model.IsOpen)
         {
-            if (!this.queue.Model.IsOpen)
-            {
-                throw new Exception();
-            }
-
-            await Task.Delay(1000);
+            this.queue.Model.BasicCancelNoWait(tag);
         }
 
-        this.queue.Model.BasicCancelNoWait(tag);
+        return Task.CompletedTask;
     }
 
     private Task ConsumerReceived(object sender, BasicDeliverEventArgs msg)
@@ -139,37 +141,43 @@ class Consumer : BackgroundService
 }
 ```
 # Logging
-If `ILoggerFactory` available in container following events will be logged. You can change default logging category and events level using `RabbitMq.DependencyInjection.Logging` class.
+If `ILoggerFactory` available in container following events will be logged. You can change default logging category and events level using `RabbitMQ.DependencyInjection.Logging` class.
 ### Default events
 
 | Catgory | Event Name | Log Level | Comments |
 |-------- | ---------- | ----------| ---------|
-RabbitMq.Connection | ConnectionCreated | Information | - |
-RabbitMq.Connection | ConnectionBlocked | Information | - |
+RabbitMQ.Connection | ConnectionCreated | Information | - |
+RabbitMQ.Connection | ConnectionBlocked | Warning | - |
+RabbitMQ.Connection | ConnectionUnblocked | Information | - |
+RabbitMQ.Connection | ConnectionShutdown | Information | - |
+RabbitMQ.Model | ModelCreated | Debug | Happened when ObjectPool can't provide previously created instance |
+RabbitMQ.Model | ModelReturn | Debug | An attempt to return model to ObjectPool. "reuse" boolean property helps to identify either model was returned to ObjectPool or disposed. |
+RabbitMQ.Model | ModelBootstrapError | Error | - |
+
 
 ### Console output sample:
 ```
-info: RabbitMq.Connection[101]
+info: RabbitMQ.Connection[101]
       Connection sample1 of type Sample.RabbitMqSetup+Connection1 created
-dbug: RabbitMq.Model[201]
+dbug: RabbitMQ.Model[201]
       Model of type Sample.RabbitMqSetup+Exc1 created
 info: Sample.Producer[0]
       Published 852ec9f7-437b-4650-8fff-2f179e36cd9b
-dbug: RabbitMq.Model[202]
+dbug: RabbitMQ.Model[202]
       Model of type Sample.RabbitMqSetup+Exc1 return to ObjectPool True
-dbug: RabbitMq.Model[201]
+dbug: RabbitMQ.Model[201]
       Model of type Sample.RabbitMqSetup+Queue1 created
 info: Sample.Producer[0]
       Published 269dd37b-ec9f-4f94-8071-5c4c4f7b1905
-dbug: RabbitMq.Model[202]
+dbug: RabbitMQ.Model[202]
       Model of type Sample.RabbitMqSetup+Exc1 return to ObjectPool True
 info: Sample.Consumer[0]
       Recieved 269dd37b-ec9f-4f94-8071-5c4c4f7b1905
 info: Microsoft.Hosting.Lifetime[0]
       Application is shutting down...
-dbug: RabbitMq.Model[202]
+dbug: RabbitMQ.Model[202]
       Model of type Sample.RabbitMqSetup+Queue1 return to ObjectPool True
-info: RabbitMq.Connection[104]
+info: RabbitMQ.Connection[104]
       Connection sample1 of type Sample.RabbitMqSetup+Connection1 shutdown. Application 200 Connection close forced (null)
 ```
 # NuGet

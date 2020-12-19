@@ -10,33 +10,35 @@ using System.Threading.Tasks;
 
 namespace Sample
 {
-    class Consumer : BackgroundService
+    class Consumer : IHostedService
     {
         private readonly IRabbitMqModel<RabbitMqSetup.Queue1> queue;
         private readonly ILogger<Consumer> logger;
+        private string tag = null;
 
         public Consumer(IRabbitMqModel<RabbitMqSetup.Queue1> queue, ILogger<Consumer> logger)
         {
             this.queue = queue ?? throw new ArgumentNullException(nameof(queue));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.queue.Model);
             consumer.Received += ConsumerReceived;
-            string tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
+            this.tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
 
-            while (!stoppingToken.IsCancellationRequested)
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            if (this.queue.Model.IsOpen)
             {
-                if (!this.queue.Model.IsOpen)
-                {
-                    throw new Exception();
-                }
-
-                await Task.Delay(1000);
+                this.queue.Model.BasicCancelNoWait(tag);
             }
 
-            this.queue.Model.BasicCancelNoWait(tag);
+            return Task.CompletedTask;
         }
 
         private Task ConsumerReceived(object sender, BasicDeliverEventArgs msg)

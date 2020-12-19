@@ -4,17 +4,17 @@ name: NuGet
 on:
   push:
     branches:
-      - main2 # Default release branch
+      - nuget # Default release branch
 jobs:
   publish:
     name: build, pack & publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 3.1.301
+      #- name: Setup .NET
+      #  uses: actions/setup-dotnet@v1
+      #  with:
+      #    dotnet-version: 3.1.301
 
       # Publish
       - name: publish on version change
