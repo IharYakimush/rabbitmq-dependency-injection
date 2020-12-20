@@ -10,13 +10,13 @@ namespace RabbitMQ.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Register <see cref="IRabbitMqConnectionProvider<TConnection>"/> service in collection. Prerequisite for model registration.
+        /// Register <see cref="IRabbitMqConnection{TConnection}"/> service in collection. Prerequisite for model registration.
         /// </summary>
         /// <typeparam name="TConnection">Type parameter to distinguish different connections</typeparam>
-        /// <param name="services"></param>
+        /// <param name="services">The <see cref="IServiceCollection"/> to register with.</param>
         /// <param name="setupAction">Action to configure connection details (e.g. server address and credentials)</param>
         /// <param name="lifetime">Connection lifetime to control when it will be disposed. Recommended value <see cref="ServiceLifetime.Singleton"/> to keep one connection open during all application lifetime.</param>
-        /// <returns></returns>
+        /// <returns>The original <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddRabbitMqConnection<TConnection>(
             this IServiceCollection services,
             Func<IServiceProvider, ConnectionFactory> setupAction,
@@ -87,20 +87,20 @@ namespace RabbitMQ.DependencyInjection
         }
 
         /// <summary>
-        /// Register classes to get <see cref="IModel"/>.
-        /// 1. <see cref="RabbitMqModelsObjectPool<TModel> - ObjectPool that can be used to get and return IModel instance. It is created with same service lifetime as connection. If model returned to ObjectPool in open state and <see cref="modelsPoolMaxRetained"/> not exceeded IModel instance will be reused within same <typeparamref name="TModel"/>.
-        /// 2. <see cref="IRabbitMqModel<TModel>"/> - It is registered in container with Transient lifetime and when needed created from same ObjectPool <see cref="RabbitMqModelsObjectPool<TModel>. Don't dispose model in your code to allow it returning to object pool automatically.
+        /// Register classes to get <see cref="IModel"/>. 
+        /// <para><see cref="RabbitMqModelsObjectPool{TModel}"/> - ObjectPool that can be used to get and return <see cref="IModel"/> instance. It is created with same <see cref="ServiceLifetime"/> as connection. If model returned to ObjectPool in open state and <paramref name="modelsPoolMaxRetained"/> not exceeded then <see cref="IModel"/> instance will be reused.</para>
+        /// <para><see cref="IRabbitMqModel{TModel}"/> - It is registered in container with Transient lifetime and when needed created from same ObjectPool <see cref="RabbitMqModelsObjectPool{TModel}"/>. Don't dispose model in your code to allow it returning to object pool automatically.</para>
         /// </summary>
         /// <typeparam name="TModel">Type parameter to distinguish different models</typeparam>
-        /// <typeparam name="TConnection">Type parameter to define which connection previously registered by <see cref="AddRabbitMqConnection<TConnection>"/> associated with model</typeparam>
-        /// <param name="services"></param>
-        /// <param name="modelBootstrapAction">Model bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.</param>
-        /// <param name="modelsPoolMaxRetained">Models ObjectPool <see cref="RabbitMqModelsObjectPool<TModel> maximum retained items count. Set this value to be >=1 in case of multithreading scenarios to improve model reuse where appropriate. If set to 0 <see cref="RabbitMqModelsObjectPool<TModel>"/> keep available for injection, but will dispose model on each return call to disable reuse. Default 5.</param>
-        /// <returns></returns>
+        /// <typeparam name="TConnection">Type parameter to define which connection previously registered by <see cref="AddRabbitMqConnection{TConnection}"/> associated with model</typeparam>
+        /// <param name="services">The <see cref="IServiceCollection"/> to register with.</param>
+        /// <param name="modelsPoolMaxRetained">Models ObjectPool <see cref="RabbitMqModelsObjectPool{TModel}"/> maximum retained items count. Set this value to be >=1 in case of multithreading scenarios to improve model reuse where appropriate. If set to 0 <see cref="RabbitMqModelsObjectPool{TModel}"/> keep available for injection, but will dispose model on each return call to disable reuse.</param>
+        /// <param name="modelBootstrapAction">Model bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.</param>        
+        /// <returns>The original <see cref="IServiceCollection"/></returns>
         public static IServiceCollection AddRabbitMqModel<TModel, TConnection>(
             this IServiceCollection services,
-            Action<IServiceProvider, IModel> modelBootstrapAction,
-            int modelsPoolMaxRetained = 5)
+            int modelsPoolMaxRetained,
+            Action<IServiceProvider, IModel> modelBootstrapAction)
         {
             if (services is null)
             {

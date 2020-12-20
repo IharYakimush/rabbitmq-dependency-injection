@@ -27,12 +27,12 @@ private static void Main(string[] args)
             }
         );
 
-        services.AddRabbitMqModel<RabbitMqSetup.Exc1, RabbitMqSetup.Connection1>((s, m) =>
+        services.AddRabbitMqModel<RabbitMqSetup.Exc1, RabbitMqSetup.Connection1>(1,(s, m) =>
         {
             m.ExchangeDeclare(RabbitMqSetup.Exc1.Name, ExchangeType.Topic, false, true, null);
         });
 
-        services.AddRabbitMqModel<RabbitMqSetup.Queue1, RabbitMqSetup.Connection1>((s, m) =>
+        services.AddRabbitMqModel<RabbitMqSetup.Queue1, RabbitMqSetup.Connection1>(0,(s, m) =>
         {
             m.QueueDeclare(RabbitMqSetup.Queue1.Name);
             m.QueueBind(RabbitMqSetup.Queue1.Name, RabbitMqSetup.Exc1.Name, "#");
