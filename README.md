@@ -64,7 +64,8 @@ public static class RabbitMqSetup
 }
 ```
 ### 3. First option of model usage
-Inject `RabbitMqModelsObjectPool<TModel>` class. It is an ObjectPool that can be used to get and return IModel instance. It is created with same service lifetime as connection. Sample of message producer with this approach:
+Inject `RabbitMqModelsObjectPool<TModel>` class. It is an ObjectPool that can be used to get and return IModel instance. It is created with same service lifetime as connection. If model returned to ObjectPool in open state and "modelsPoolMaxRetained" not exceeded IModel instance will be reused within same type param.
+Sample of message producer with this approach:
 ```
 class Producer : BackgroundService
 {
@@ -101,7 +102,8 @@ class Producer : BackgroundService
 }
 ```
 ### 4. Second option of model usage
-Inject `IRabbitMqModel<TModel>` interface. It is registered in container with Transient lifetime and when needed created from same ObjectPool described in section 3. Don't dispose model in your code to allow it returning to object pool automatically. Sample of message consumer with this approach:
+Inject `IRabbitMqModel<TModel>` interface. It is registered in container with Transient lifetime and when needed created from same ObjectPool described in section 3. Don't dispose model in your code to allow it returning to object pool automatically. 
+Sample of message consumer with this approach:
 ```
 internal class Consumer : IHostedService
 {

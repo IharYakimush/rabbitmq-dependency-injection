@@ -87,13 +87,15 @@ namespace RabbitMQ.DependencyInjection
         }
 
         /// <summary>
-        /// Register <see cref="RabbitMqModelsObjectPool<TModel>"/> and <see cref="IRabbitMqModel<TModel>"/>.
+        /// Register classes to get <see cref="IModel"/>.
+        /// 1. <see cref="RabbitMqModelsObjectPool<TModel> - ObjectPool that can be used to get and return IModel instance. It is created with same service lifetime as connection. If model returned to ObjectPool in open state and <see cref="modelsPoolMaxRetained"/> not exceeded IModel instance will be reused within same <typeparamref name="TModel"/>.
+        /// 2. <see cref="IRabbitMqModel<TModel>"/> - It is registered in container with Transient lifetime and when needed created from same ObjectPool <see cref="RabbitMqModelsObjectPool<TModel>. Don't dispose model in your code to allow it returning to object pool automatically.
         /// </summary>
         /// <typeparam name="TModel">Type parameter to distinguish different models</typeparam>
         /// <typeparam name="TConnection">Type parameter to define which connection previously registered by <see cref="AddRabbitMqConnection<TConnection>"/> associated with model</typeparam>
         /// <param name="services"></param>
         /// <param name="modelBootstrapAction">Model bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.</param>
-        /// <param name="modelsPoolMaxRetained">Models ObjectPool maximum retained items count. Default 5. Increase this value in case of multi-threading scenarious to improve model reuse.</param>
+        /// <param name="modelsPoolMaxRetained">Models ObjectPool <see cref="RabbitMqModelsObjectPool<TModel> maximum retained items count. Set this value to be >=1 in case of multithreading scenarios to improve model reuse where appropriate. If set to 0 <see cref="RabbitMqModelsObjectPool<TModel>"/> keep available for injection, but will dispose model on each return call to disable reuse. Default 5.</param>
         /// <returns></returns>
         public static IServiceCollection AddRabbitMqModel<TModel, TConnection>(
             this IServiceCollection services,
