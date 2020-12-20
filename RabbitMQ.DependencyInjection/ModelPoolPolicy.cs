@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System;
 
 namespace RabbitMQ.DependencyInjection
@@ -55,6 +56,21 @@ namespace RabbitMQ.DependencyInjection
                 {
                     model.CallbackException += ModelCallbackException;
                 }
+
+                if (this.logger.IsEnabled(Logging.Model.BasicReturnEventLevel))
+                {
+                    model.BasicReturn += ModelBasicReturn;
+                }
+
+                if (this.logger.IsEnabled(Logging.Model.BasicAcksEventLevel))
+                {
+                    model.BasicAcks += ModelBasicAcks;
+                }
+
+                if (this.logger.IsEnabled(Logging.Model.BasicNacksEventLevel))
+                {
+                    model.BasicNacks += ModelBasicNacks;
+                }
             }
 
             try
@@ -71,10 +87,45 @@ namespace RabbitMQ.DependencyInjection
             return model;
         }
 
-        private void ModelCallbackException(object sender, Client.Events.CallbackExceptionEventArgs e)
+        private void ModelBasicNacks(object sender, BasicNackEventArgs e)
         {
             IModel model = sender as IModel;
-            this.logger.Log(Logging.Model.CallbackExceptionEventLevel, Logging.Model.CallbackExceptionEventId, e.Exception, "Model {ChannelNumber} of type {TypeParam} callback exception", model?.ChannelNumber, typeof(TModel));
+            this.logger.Log(
+                Logging.Model.BasicNacksEventLevel,
+                Logging.Model.BasicNacksEventId,
+                "Model {ChannelNumber} of type {TypeParam} basic nack. DeliveryTag {DeliveryTag}, Requeue {Requeue}, Multiple {Multiple}",
+                model?.ChannelNumber, typeof(TModel), e.DeliveryTag, e.Requeue, e.Multiple);
+        }
+
+        private void ModelBasicAcks(object sender, BasicAckEventArgs e)
+        {
+            IModel model = sender as IModel;
+            this.logger.Log(
+                Logging.Model.BasicAcksEventLevel,
+                Logging.Model.BasicAcksEventId,
+                "Model {ChannelNumber} of type {TypeParam} basic ack. DeliveryTag {DeliveryTag}, Multiple {Multiple}",
+                model?.ChannelNumber, typeof(TModel), e.DeliveryTag, e.Multiple);
+        }
+
+        private void ModelBasicReturn(object sender, BasicReturnEventArgs e)
+        {
+            IModel model = sender as IModel;
+            this.logger.Log(
+                Logging.Model.BasicReturnEventLevel, 
+                Logging.Model.BasicReturnEventId, 
+                "Model {ChannelNumber} of type {TypeParam} basic return {ReplyCode} {ReplyText}", 
+                model?.ChannelNumber, typeof(TModel), e.ReplyCode, e.ReplyText);
+
+        }
+
+        private void ModelCallbackException(object sender, CallbackExceptionEventArgs e)
+        {
+            IModel model = sender as IModel;
+            this.logger.Log(
+                Logging.Model.CallbackExceptionEventLevel, 
+                Logging.Model.CallbackExceptionEventId, e.Exception, 
+                "Model {ChannelNumber} of type {TypeParam} callback exception", 
+                model?.ChannelNumber, typeof(TModel));
         }
 
         private void ModelModelShutdown(object sender, ShutdownEventArgs e)
@@ -90,7 +141,11 @@ namespace RabbitMQ.DependencyInjection
         private void ModelBasicRecoverOk(object sender, EventArgs e)
         {
             IModel model = sender as IModel;
-            this.logger.Log(Logging.Model.BasicRecoverOkEventLevel, Logging.Model.BasicRecoverOkEventId, "Model {ChannelNumber} of type {TypeParam} recover ok", model?.ChannelNumber, typeof(TModel));
+            this.logger.Log(
+                Logging.Model.BasicRecoverOkEventLevel, 
+                Logging.Model.BasicRecoverOkEventId, 
+                "Model {ChannelNumber} of type {TypeParam} recover ok", 
+                model?.ChannelNumber, typeof(TModel));
         }
 
         public bool Return(IModel obj)

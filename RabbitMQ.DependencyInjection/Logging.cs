@@ -48,6 +48,15 @@ namespace RabbitMQ.DependencyInjection
 
             public static EventId CreateExceptionEventId = new EventId(206, "ModelCreateException");
             public static LogLevel CreateExceptionEventLevel = LogLevel.Error;
+
+            public static EventId BasicReturnEventId = new EventId(207, "ModelBasicReturn");
+            public static LogLevel BasicReturnEventLevel = LogLevel.Debug;
+
+            public static EventId BasicAcksEventId = new EventId(208, "ModelBasicAcks");
+            public static LogLevel BasicAcksEventLevel = LogLevel.Debug;
+
+            public static EventId BasicNacksEventId = new EventId(209, "ModelBasicNacks");
+            public static LogLevel BasicNacksEventLevel = LogLevel.Debug;
         }
     }
 }
