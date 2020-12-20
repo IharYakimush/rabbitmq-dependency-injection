@@ -162,6 +162,10 @@ RabbitMQ.Model | ModelBootstrapException | Error | - |
 RabbitMQ.Model | ModelShutdown | Debug | - |
 RabbitMQ.Model | CallbackException | Warning | - |
 RabbitMQ.Model | ModelCreateException | Error | - |
+RabbitMQ.Model | ModelBasicReturn | Debug | - |
+RabbitMQ.Model | ModelBasicAcks | Debug | - |
+RabbitMQ.Model | ModelBasicNacks | Debug | - |
+
 
 
 ### Console output sample:
