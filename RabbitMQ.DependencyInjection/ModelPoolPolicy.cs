@@ -23,11 +23,38 @@ namespace RabbitMQ.DependencyInjection
         }
         public IModel Create()
         {
-            var model = this.connectionProvider.Connection.CreateModel();
+            IModel model;
 
-            if (this.logger != null && this.logger.IsEnabled(Logging.Model.CreatedEventLevel))
+            try
             {
-                this.logger.Log(Logging.Model.CreatedEventLevel, Logging.Model.CreatedEventId, "Model of type {TypeParam} created", typeof(TModel));
+                model = this.connectionProvider.Connection.CreateModel();
+            }
+            catch (Exception exc)
+            {
+                this.logger?.Log(Logging.Model.CreateExceptionEventLevel, Logging.Model.CreateExceptionEventId, exc, "Model of type {TypeParam} create exception", typeof(TModel));
+
+                throw;
+            }
+            
+
+            if (this.logger != null)
+            {                
+                this.logger.Log(Logging.Model.CreatedEventLevel, Logging.Model.CreatedEventId, "Model {ChannelNumber} of type {TypeParam} created", model.ChannelNumber, typeof(TModel));
+                
+                if (this.logger.IsEnabled(Logging.Model.BasicRecoverOkEventLevel))
+                {
+                    model.BasicRecoverOk += ModelBasicRecoverOk;
+                }
+
+                if (this.logger.IsEnabled(Logging.Model.ShutdownEventLevel))
+                {
+                    model.ModelShutdown += ModelModelShutdown;
+                }
+
+                if (this.logger.IsEnabled(Logging.Model.CallbackExceptionEventLevel))
+                {
+                    model.CallbackException += ModelCallbackException;
+                }
             }
 
             try
@@ -36,10 +63,7 @@ namespace RabbitMQ.DependencyInjection
             }
             catch (Exception exception)
             {
-                if (this.logger != null && this.logger.IsEnabled(Logging.Model.BootstrapErrorEventLevel))
-                {
-                    this.logger.Log(Logging.Model.BootstrapErrorEventLevel, Logging.Model.BootstrapErrorEventId, exception, "Model of type {TypeParam} bootstrap error", typeof(TModel));
-                }
+                this.logger?.Log(Logging.Model.BootstrapExceptionEventLevel, Logging.Model.BootstrapExceptionEventId, exception, "Model {ChannelNumber} of type {TypeParam} bootstrap error", model.ChannelNumber, typeof(TModel));
 
                 throw;
             }
@@ -47,16 +71,31 @@ namespace RabbitMQ.DependencyInjection
             return model;
         }
 
-        public bool Return(IModel obj)
+        private void ModelCallbackException(object sender, Client.Events.CallbackExceptionEventArgs e)
         {
-            bool result = obj?.IsOpen ?? false;
+            IModel model = sender as IModel;
+            this.logger.Log(Logging.Model.CallbackExceptionEventLevel, Logging.Model.CallbackExceptionEventId, e.Exception, "Model {ChannelNumber} of type {TypeParam} callback exception", model?.ChannelNumber, typeof(TModel));
+        }
 
-            if (this.logger != null && this.logger.IsEnabled(Logging.Model.ReturnEventLevel))
-            {
-                this.logger.Log(Logging.Model.ReturnEventLevel, Logging.Model.ReturnEventId, "Model of type {TypeParam} return to ObjectPool {reuse}", typeof(TModel), result);
-            }
+        private void ModelModelShutdown(object sender, ShutdownEventArgs e)
+        {
+            IModel model = sender as IModel;
+            logger.Log(
+                        Logging.Model.ShutdownEventLevel,
+                        Logging.Model.ShutdownEventId,
+                        "Model {ChannelNumber} of type {TypeParam} shutdown. {Initiator} {ReplyCode} {ReplyText} {Cause}", 
+                        model?.ChannelNumber, typeof(TModel), e.Initiator, e.ReplyCode, e.ReplyText, e.Cause);
+        }
 
-            return result;
+        private void ModelBasicRecoverOk(object sender, EventArgs e)
+        {
+            IModel model = sender as IModel;
+            this.logger.Log(Logging.Model.BasicRecoverOkEventLevel, Logging.Model.BasicRecoverOkEventId, "Model {ChannelNumber} of type {TypeParam} recover ok", model?.ChannelNumber, typeof(TModel));
+        }
+
+        public bool Return(IModel obj)
+        {            
+            return obj?.IsOpen ?? false;
         }
     }
 }

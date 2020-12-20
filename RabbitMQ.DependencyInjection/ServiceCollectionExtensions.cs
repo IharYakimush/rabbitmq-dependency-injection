@@ -19,7 +19,7 @@ namespace RabbitMQ.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddRabbitMqConnection<TConnection>(
             this IServiceCollection services,
-            Action<IServiceProvider, ConnectionFactory> setupAction,
+            Func<IServiceProvider, ConnectionFactory> setupAction,
             ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
             if (services is null)
@@ -40,52 +40,43 @@ namespace RabbitMQ.DependencyInjection
             services.Add(new ServiceDescriptor(
                 typeof(IRabbitMqConnection<TConnection>), sp =>
                  {
-                     ConnectionFactory factory = new ConnectionFactory();
+                     ILogger logger = sp.GetService<ILoggerFactory>()?.CreateLogger(Logging.Connection.CategoryName);
 
-                     setupAction.Invoke(sp, factory);
-
-                     IConnection result = factory.CreateConnection();
-
-                     var loggerFactory = sp.GetService<ILoggerFactory>();
-
-                     if (loggerFactory != null)
+                     ConnectionFactory factory;
+                     IConnection result;
+                     try
                      {
-                         var logger = loggerFactory.CreateLogger(Logging.Connection.CategoryName);
+                         factory = setupAction.Invoke(sp);
+                     }
+                     catch (Exception exception)
+                     {
+                         logger?.Log(
+                             Logging.Connection.FactoryExceptionEventLevel, 
+                             Logging.Connection.FactoryExceptionEventId, exception, 
+                             "Connection of type {TypeParam} factory setup exception", typeof(TConnection));
 
+                         throw;
+                     }
+
+                     try
+                     {
+                         result = factory.CreateConnection();
+                     }
+                     catch (Exception exception)
+                     {
+                         logger?.Log(
+                             Logging.Connection.CreateExceptionEventLevel, 
+                             Logging.Connection.CreateExceptionEventId, exception, 
+                             "Connection of type {TypeParam} create exception", typeof(TConnection));
+
+                         throw;
+                     }
+
+                     if (logger != null)
+                     {
                          logger.Log(Logging.Connection.CreatedEventLevel, Logging.Connection.CreatedEventId, "Connection {ClientProvidedName} of type {TypeParam} created", factory.ClientProvidedName, typeof(TConnection));
 
-                         if (logger.IsEnabled(Logging.Connection.BlockedEventLevel))
-                         {
-                             result.ConnectionBlocked += (object sender, ConnectionBlockedEventArgs e) =>
-                             {
-                                 logger.Log(
-                                     Logging.Connection.BlockedEventLevel,
-                                     Logging.Connection.BlockedEventId,
-                                     "Connection {ClientProvidedName} of type {TypeParam} blocked. {Reason}", factory.ClientProvidedName, typeof(TConnection), e.Reason);
-                             };
-                         }
-
-                         if (logger.IsEnabled(Logging.Connection.UnblockedEventLevel))
-                         {
-                             result.ConnectionUnblocked += (object sender, EventArgs e) =>
-                             {
-                                 logger.Log(
-                                     Logging.Connection.UnblockedEventLevel,
-                                     Logging.Connection.UnblockedEventId,
-                                     "Connection {ClientProvidedName} of type {TypeParam} unblocked.", factory.ClientProvidedName, typeof(TConnection));
-                             };
-                         }
-
-                         if (logger.IsEnabled(Logging.Connection.ShutdownEventLevel))
-                         {
-                             result.ConnectionShutdown += (object sender, ShutdownEventArgs e) =>
-                             {
-                                 logger.Log(
-                                     Logging.Connection.ShutdownEventLevel,
-                                     Logging.Connection.ShutdownEventId,
-                                     "Connection {ClientProvidedName} of type {TypeParam} shutdown. {Initiator} {ReplyCode} {ReplyText} {Cause}", factory.ClientProvidedName, typeof(TConnection), e.Initiator, e.ReplyCode, e.ReplyText, e.Cause);
-                             };
-                         }
+                         SubscribeConnectionEventsForLogging<TConnection>(result, logger, factory);
                      }
 
                      return new RabbitMqConnection<TConnection>(result);
@@ -102,12 +93,12 @@ namespace RabbitMQ.DependencyInjection
         /// <typeparam name="TConnection">Type parameter to define which connection previously registered by <see cref="AddRabbitMqConnection<TConnection>"/> associated with model</typeparam>
         /// <param name="services"></param>
         /// <param name="modelBootstrapAction">Model bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.</param>
-        /// <param name="modelsPoolMaxRetained">Models ObjectPool maximum retained items count. Default 1. Increase this value in case of multi-threading scenarious to improve model reuse.</param>
+        /// <param name="modelsPoolMaxRetained">Models ObjectPool maximum retained items count. Default 5. Increase this value in case of multi-threading scenarious to improve model reuse.</param>
         /// <returns></returns>
         public static IServiceCollection AddRabbitMqModel<TModel, TConnection>(
             this IServiceCollection services,
             Action<IServiceProvider, IModel> modelBootstrapAction,
-            int modelsPoolMaxRetained = 1)
+            int modelsPoolMaxRetained = 5)
         {
             if (services is null)
             {
@@ -144,6 +135,42 @@ namespace RabbitMQ.DependencyInjection
             services.AddTransient<IRabbitMqModel<TModel>, RabbitMqModel<TModel>>();
 
             return services;
+        }
+
+        private static void SubscribeConnectionEventsForLogging<TConnection>(IConnection result, ILogger logger, IConnectionFactory factory)
+        {
+            if (logger.IsEnabled(Logging.Connection.BlockedEventLevel))
+            {
+                result.ConnectionBlocked += (object sender, ConnectionBlockedEventArgs e) =>
+                {
+                    logger.Log(
+                        Logging.Connection.BlockedEventLevel,
+                        Logging.Connection.BlockedEventId,
+                        "Connection {ClientProvidedName} of type {TypeParam} blocked. {Reason}", factory.ClientProvidedName, typeof(TConnection), e.Reason);
+                };
+            }
+
+            if (logger.IsEnabled(Logging.Connection.UnblockedEventLevel))
+            {
+                result.ConnectionUnblocked += (object sender, EventArgs e) =>
+                {
+                    logger.Log(
+                        Logging.Connection.UnblockedEventLevel,
+                        Logging.Connection.UnblockedEventId,
+                        "Connection {ClientProvidedName} of type {TypeParam} unblocked.", factory.ClientProvidedName, typeof(TConnection));
+                };
+            }
+
+            if (logger.IsEnabled(Logging.Connection.ShutdownEventLevel))
+            {
+                result.ConnectionShutdown += (object sender, ShutdownEventArgs e) =>
+                {
+                    logger.Log(
+                        Logging.Connection.ShutdownEventLevel,
+                        Logging.Connection.ShutdownEventId,
+                        "Connection {ClientProvidedName} of type {TypeParam} shutdown. {Initiator} {ReplyCode} {ReplyText} {Cause}", factory.ClientProvidedName, typeof(TConnection), e.Initiator, e.ReplyCode, e.ReplyText, e.Cause);
+                };
+            }
         }
     }
 }

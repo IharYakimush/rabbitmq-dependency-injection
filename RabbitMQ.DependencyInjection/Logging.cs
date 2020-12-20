@@ -19,6 +19,12 @@ namespace RabbitMQ.DependencyInjection
 
             public static EventId ShutdownEventId = new EventId(104, "ConnectionShutdown");
             public static LogLevel ShutdownEventLevel = LogLevel.Information;
+
+            public static EventId CreateExceptionEventId = new EventId(105, "ConnectionCreateException");
+            public static LogLevel CreateExceptionEventLevel = LogLevel.Error;
+
+            public static EventId FactoryExceptionEventId = new EventId(106, "ConnectionFactorySetupException");
+            public static LogLevel FactoryExceptionEventLevel = LogLevel.Error;
         }
 
         public static class Model
@@ -28,11 +34,20 @@ namespace RabbitMQ.DependencyInjection
             public static EventId CreatedEventId = new EventId(201, "ModelCreated");
             public static LogLevel CreatedEventLevel = LogLevel.Debug;
 
-            public static EventId ReturnEventId = new EventId(202, "ModelReturn");
-            public static LogLevel ReturnEventLevel = LogLevel.Debug;
+            public static EventId BasicRecoverOkEventId = new EventId(202, "ModelBasicRecoverOk");
+            public static LogLevel BasicRecoverOkEventLevel = LogLevel.Information;
 
-            public static EventId BootstrapErrorEventId = new EventId(203, "ModelBootstrapError");
-            public static LogLevel BootstrapErrorEventLevel = LogLevel.Error;
+            public static EventId BootstrapExceptionEventId = new EventId(203, "ModelBootstrapException");
+            public static LogLevel BootstrapExceptionEventLevel = LogLevel.Error;
+
+            public static EventId ShutdownEventId = new EventId(204, "ModelShutdown");
+            public static LogLevel ShutdownEventLevel = LogLevel.Debug;
+
+            public static EventId CallbackExceptionEventId = new EventId(205, "ModelCallbackException");
+            public static LogLevel CallbackExceptionEventLevel = LogLevel.Warning;
+
+            public static EventId CreateExceptionEventId = new EventId(206, "ModelCreateException");
+            public static LogLevel CreateExceptionEventLevel = LogLevel.Error;
         }
     }
 }

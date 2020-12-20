@@ -6,7 +6,7 @@ Use type params to distinguish different instances. By default connection has re
 Model registration required 2 type params. First to be able to inject different models to your classes. Second to bind model to connection. Define bootstrap action that will be executed after new model creation. Usefull for declaring exchanges, queues, etc.
 
 ```
-static void Main(string[] args)
+private static void Main(string[] args)
 {
     new HostBuilder()
     .ConfigureLogging((ILoggingBuilder b) =>
@@ -16,14 +16,16 @@ static void Main(string[] args)
     })
     .ConfigureServices(services =>
     {
-        services.AddRabbitMqConnection<RabbitMqSetup.Connection1>((s, f) =>
-        {
-            f.ClientProvidedName = "sample1";
-            f.Endpoint = new AmqpTcpEndpoint("localhost", 5672);
-            f.UserName = "myUser";
-            f.Password = "myPass";
-            f.DispatchConsumersAsync = true;
-        });
+        services.AddRabbitMqConnection<RabbitMqSetup.Connection1>(
+            (s) => new ConnectionFactory
+            {
+                ClientProvidedName = "sample1",
+                Endpoint = new AmqpTcpEndpoint("localhost", 5672),
+                UserName = "myUser",
+                Password = "myPass",
+                DispatchConsumersAsync = true
+            }
+        );
 
         services.AddRabbitMqModel<RabbitMqSetup.Exc1, RabbitMqSetup.Connection1>((s, m) =>
         {
@@ -33,7 +35,7 @@ static void Main(string[] args)
         services.AddRabbitMqModel<RabbitMqSetup.Queue1, RabbitMqSetup.Connection1>((s, m) =>
         {
             m.QueueDeclare(RabbitMqSetup.Queue1.Name);
-            m.QueueBind(RabbitMqSetup.Queue1.Name, RabbitMqSetup.Exc1.Name, "#");                        
+            m.QueueBind(RabbitMqSetup.Queue1.Name, RabbitMqSetup.Exc1.Name, "#");
         });
 
         services.AddHostedService<Producer>();
@@ -101,7 +103,7 @@ class Producer : BackgroundService
 ### 4. Second option of model usage
 Inject `IRabbitMqModel<TModel>` interface. It is registered in container with Transient lifetime and when needed created from same ObjectPool described in section 3. Don't dispose model in your code to allow it returning to object pool automatically. Sample of message consumer with this approach:
 ```
-class Consumer : IHostedService
+internal class Consumer : IHostedService
 {
     private readonly IRabbitMqModel<RabbitMqSetup.Queue1> queue;
     private readonly ILogger<Consumer> logger;
@@ -147,12 +149,14 @@ If `ILoggerFactory` available in container following events will be logged. You 
 | Catgory | Event Name | Log Level | Comments |
 |-------- | ---------- | ----------| ---------|
 RabbitMQ.Connection | ConnectionCreated | Information | - |
-RabbitMQ.Connection | ConnectionBlocked | Warning | - |
+RabbitMQ.Connection | ConnectionBlocked | Warning | https://www.rabbitmq.com/connection-blocked.html |
 RabbitMQ.Connection | ConnectionUnblocked | Information | - |
 RabbitMQ.Connection | ConnectionShutdown | Information | - |
-RabbitMQ.Model | ModelCreated | Debug | Happened when ObjectPool can't provide previously created instance |
-RabbitMQ.Model | ModelReturn | Debug | An attempt to return model to ObjectPool. "reuse" boolean property helps to identify either model was returned to ObjectPool or disposed. |
-RabbitMQ.Model | ModelBootstrapError | Error | - |
+RabbitMQ.Model | ModelCreated | Debug | ObjectPool can't provide previously created instance, so creation a new one |
+RabbitMQ.Model | BasicRecoverOk | Information | - |
+RabbitMQ.Model | ModelBootstrapException | Error | - |
+RabbitMQ.Model | ModelShutdown | Debug | - |
+RabbitMQ.Model | CallbackException | Warning | - |
 
 
 ### Console output sample:
@@ -160,24 +164,22 @@ RabbitMQ.Model | ModelBootstrapError | Error | - |
 info: RabbitMQ.Connection[101]
       Connection sample1 of type Sample.RabbitMqSetup+Connection1 created
 dbug: RabbitMQ.Model[201]
-      Model of type Sample.RabbitMqSetup+Exc1 created
+      Model 1 of type Sample.RabbitMqSetup+Exc1 created
 info: Sample.Producer[0]
-      Published 852ec9f7-437b-4650-8fff-2f179e36cd9b
-dbug: RabbitMQ.Model[202]
-      Model of type Sample.RabbitMqSetup+Exc1 return to ObjectPool True
+      Published 1d15311c-21d5-4186-bc26-b4de45013e1c
 dbug: RabbitMQ.Model[201]
-      Model of type Sample.RabbitMqSetup+Queue1 created
+      Model 2 of type Sample.RabbitMqSetup+Queue1 created
 info: Sample.Producer[0]
-      Published 269dd37b-ec9f-4f94-8071-5c4c4f7b1905
-dbug: RabbitMQ.Model[202]
-      Model of type Sample.RabbitMqSetup+Exc1 return to ObjectPool True
+      Published b1c4a5b6-25f6-4e05-9425-4db8940d6549
 info: Sample.Consumer[0]
-      Recieved 269dd37b-ec9f-4f94-8071-5c4c4f7b1905
+      Recieved b1c4a5b6-25f6-4e05-9425-4db8940d6549
 info: Microsoft.Hosting.Lifetime[0]
       Application is shutting down...
-dbug: RabbitMQ.Model[202]
-      Model of type Sample.RabbitMqSetup+Queue1 return to ObjectPool True
 info: RabbitMQ.Connection[104]
       Connection sample1 of type Sample.RabbitMqSetup+Connection1 shutdown. Application 200 Connection close forced (null)
+dbug: RabbitMQ.Model[204]
+      Model 1 of type Sample.RabbitMqSetup+Exc1 shutdown. Application 200 Connection close forced (null)
+dbug: RabbitMQ.Model[204]
+      Model 2 of type Sample.RabbitMqSetup+Queue1 shutdown. Application 200 Connection close forced (null)
 ```
 # NuGet

@@ -18,14 +18,16 @@ namespace Sample
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddRabbitMqConnection<RabbitMqSetup.Connection1>((s, f) =>
-                    {
-                        f.ClientProvidedName = "sample1";
-                        f.Endpoint = new AmqpTcpEndpoint("localhost", 5672);
-                        f.UserName = "myUser";
-                        f.Password = "myPass";
-                        f.DispatchConsumersAsync = true;
-                    });
+                    services.AddRabbitMqConnection<RabbitMqSetup.Connection1>(
+                        (s) => new ConnectionFactory
+                        {
+                            ClientProvidedName = "sample1",
+                            Endpoint = new AmqpTcpEndpoint("localhost", 5672),
+                            UserName = "myUser",
+                            Password = "myPass",
+                            DispatchConsumersAsync = true
+                        }
+                    );
 
                     services.AddRabbitMqModel<RabbitMqSetup.Exc1, RabbitMqSetup.Connection1>((s, m) =>
                     {
