@@ -154,7 +154,7 @@ RabbitMQ.Connection | ConnectionUnblocked | Information | - |
 RabbitMQ.Connection | ConnectionShutdown | Information | - |
 RabbitMQ.Connection | ConnectionCreateException | Error | - |
 RabbitMQ.Connection | ConnectionFactorySetupException | Error | - |
-RabbitMQ.Model | ModelCreated | Debug | ObjectPool can't provide previously created instance, so creation a new one |
+RabbitMQ.Model | ModelCreated | Debug | ObjectPool can't provide previously created instance, so create a new one |
 RabbitMQ.Model | BasicRecoverOk | Information | - |
 RabbitMQ.Model | ModelBootstrapException | Error | - |
 RabbitMQ.Model | ModelShutdown | Debug | - |
