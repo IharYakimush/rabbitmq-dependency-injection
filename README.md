@@ -152,11 +152,14 @@ RabbitMQ.Connection | ConnectionCreated | Information | - |
 RabbitMQ.Connection | ConnectionBlocked | Warning | https://www.rabbitmq.com/connection-blocked.html |
 RabbitMQ.Connection | ConnectionUnblocked | Information | - |
 RabbitMQ.Connection | ConnectionShutdown | Information | - |
+RabbitMQ.Connection | ConnectionCreateException | Error | - |
+RabbitMQ.Connection | ConnectionFactorySetupException | Error | - |
 RabbitMQ.Model | ModelCreated | Debug | ObjectPool can't provide previously created instance, so creation a new one |
 RabbitMQ.Model | BasicRecoverOk | Information | - |
 RabbitMQ.Model | ModelBootstrapException | Error | - |
 RabbitMQ.Model | ModelShutdown | Debug | - |
 RabbitMQ.Model | CallbackException | Warning | - |
+RabbitMQ.Model | ModelCreateException | Error | - |
 
 
 ### Console output sample:
