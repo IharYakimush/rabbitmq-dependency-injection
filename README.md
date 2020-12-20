@@ -192,3 +192,4 @@ dbug: RabbitMQ.Model[204]
       Model 2 of type Sample.RabbitMqSetup+Queue1 shutdown. Application 200 Connection close forced (null)
 ```
 # NuGet
+https://www.nuget.org/packages/RabbitMQ.DependencyInjection
