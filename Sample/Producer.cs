@@ -33,6 +33,10 @@ namespace Sample
 
                     this.logger.LogInformation("Published {value}", value);
                 }
+                catch(Exception exc)
+                {
+                    this.logger.LogError(exc, "Exception");
+                }
                 finally
                 {
                     this.excObjectPool.Return(model);

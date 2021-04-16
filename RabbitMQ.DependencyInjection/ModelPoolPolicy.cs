@@ -81,6 +81,9 @@ namespace RabbitMQ.DependencyInjection
             {
                 this.logger?.Log(Logging.Model.BootstrapExceptionEventLevel, Logging.Model.BootstrapExceptionEventId, exception, "Model {ChannelNumber} of type {TypeParam} bootstrap error", model.ChannelNumber, typeof(TModel));
 
+                // dispose model because it not going to be returned to pool
+                model.Dispose();
+
                 throw;
             }
 
@@ -149,7 +152,7 @@ namespace RabbitMQ.DependencyInjection
         }
 
         public bool Return(IModel obj)
-        {            
+        {
             return obj?.IsOpen ?? false;
         }
     }

@@ -56,7 +56,24 @@ namespace RabbitMQ.DependencyInjection
             public static LogLevel BasicAcksEventLevel = LogLevel.Debug;
 
             public static EventId BasicNacksEventId = new EventId(209, "ModelBasicNacks");
-            public static LogLevel BasicNacksEventLevel = LogLevel.Debug;
+            public static LogLevel BasicNacksEventLevel = LogLevel.Debug;            
+        }
+
+        public static class ModelObjectPool
+        {
+            public static string CategoryName = "RabbitMQ.ModelsObjectPool";
+
+            public static EventId ReturningOpenedModelEventId = new EventId(301, "ReturningOpenedModel");
+            public static LogLevel ReturningOpenedModelEventLevel = LogLevel.Debug;
+
+            public static EventId ReturningClosedModelEventId = new EventId(302, "ReturningClosedModel");
+            public static LogLevel ReturningClosedModelEventLevel = LogLevel.Debug;
+
+            public static EventId GetOpenedModelEventId = new EventId(303, "GetOpenedModel");
+            public static LogLevel GetOpenedModelEventLevel = LogLevel.Debug;
+
+            public static EventId GetClosedModelEventId = new EventId(304, "GetClosedModel");
+            public static LogLevel GetClosedModelEventLevel = LogLevel.Warning;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -42,7 +43,7 @@ namespace RabbitMQ.DependencyInjection
                  {
                      ILogger logger = sp.GetService<ILoggerFactory>()?.CreateLogger(Logging.Connection.CategoryName);
 
-                     ConnectionFactory factory;
+                     ConnectionFactory factory;                     
                      IConnection result;
                      try
                      {
@@ -60,7 +61,7 @@ namespace RabbitMQ.DependencyInjection
 
                      try
                      {
-                         result = factory.CreateConnection();
+                         result = factory.CreateConnection();                         
                      }
                      catch (Exception exception)
                      {
@@ -131,10 +132,34 @@ namespace RabbitMQ.DependencyInjection
                     sp.GetService<ILoggerFactory>(),
                     (m) => modelBootstrapAction(sp, m));
 
-                return new RabbitMqModelsObjectPool<TModel>(policy, modelsPoolMaxRetained);
+                return new RabbitMqModelsObjectPool<TModel>(sp.GetService<ILoggerFactory>(), policy, modelsPoolMaxRetained);
             }, connectionDescriptor.Lifetime));
 
             services.AddTransient<IRabbitMqModel<TModel>, RabbitMqModel<TModel>>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddRabbitMqConsumerHostingService<TModel, THandler>(
+            this IServiceCollection services) where THandler:class, IConsumerHandler
+        {
+            services.TryAddTransient<THandler>();
+
+            var modelDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(RabbitMqModelsObjectPool<TModel>));
+
+            if (modelDescriptor == null)
+            {
+                throw new InvalidOperationException($"Model with type param {typeof(TModel)} should be registered first");
+            }
+
+            var serviceDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(RabbitMqConsumerService<RabbitMqModelsObjectPool<TModel>, THandler>));
+
+            if (serviceDescriptor != null)
+            {
+                throw new InvalidOperationException($"Consumer with model type param {typeof(TModel)} and handler type param {typeof(THandler)} already added");
+            }
+
+            services.AddHostedService<RabbitMqConsumerService<TModel, THandler>>();
 
             return services;
         }
@@ -172,7 +197,7 @@ namespace RabbitMQ.DependencyInjection
                         Logging.Connection.ShutdownEventId,
                         "Connection {ClientProvidedName} of type {TypeParam} shutdown. {Initiator} {ReplyCode} {ReplyText} {Cause}", factory.ClientProvidedName, typeof(TConnection), e.Initiator, e.ReplyCode, e.ReplyText, e.Cause);
                 };
-            }
+            }            
         }
     }
 }

@@ -1,24 +1,91 @@
-﻿using Microsoft.Extensions.ObjectPool;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.ObjectPool;
 using RabbitMQ.Client;
+using System;
+using System.Linq;
 
 namespace RabbitMQ.DependencyInjection
 {
-    public class RabbitMqModelsObjectPool<TModel> : DefaultObjectPool<IModel>
+    public class RabbitMqModelsObjectPool<TModel> : ObjectPool<IModel>, IDisposable
     {
-        private readonly bool disableObjectPool;
-        public RabbitMqModelsObjectPool(IPooledObjectPolicy<IModel> policy, int maximumRetained) : base(policy, maximumRetained <= 0 ? 1 : maximumRetained)
+        private readonly bool doNotRetain;
+        private readonly ILogger logger;
+        private readonly ObjectPool<IModel> inner;
+
+        public RabbitMqModelsObjectPool(ILoggerFactory loggerFactory, IPooledObjectPolicy<IModel> policy, int maximumRetained)
         {
-            this.disableObjectPool = maximumRetained <= 0;
+            // unable to create disposable object pool using standard approach
+            // because it not works with interfaces type params
+            Type innerType = typeof(ObjectPool<>).Assembly.DefinedTypes.Single(t => t.Name.StartsWith("DisposableObjectPool"));
+            inner = (ObjectPool<IModel>)Activator.CreateInstance(innerType.MakeGenericType(typeof(IModel)), policy, maximumRetained <= 0 ? 1 : maximumRetained);
+
+            // workaround because not possible to create object pool with capacity < 1
+            this.doNotRetain = maximumRetained <= 0;
+
+
+            if (loggerFactory != null)
+            {
+                this.logger = loggerFactory.CreateLogger(Logging.ModelObjectPool.CategoryName);
+            }
         }
 
         public override void Return(IModel obj)
         {
-            if (this.disableObjectPool && obj.IsOpen)
+            if (obj == null)
+            {
+                return;
+            }
+
+            if (logger != null)
+            {
+                LogLevel logLevel = obj.IsOpen
+                    ? Logging.ModelObjectPool.ReturningOpenedModelEventLevel
+                    : Logging.ModelObjectPool.ReturningClosedModelEventLevel;
+
+                if (logger.IsEnabled(logLevel))
+                {
+                    EventId eventId = obj.IsOpen 
+                        ? Logging.ModelObjectPool.ReturningOpenedModelEventId 
+                        : Logging.ModelObjectPool.ReturningClosedModelEventId;
+
+                    logger.Log(logLevel, eventId, "Model {ChannelNumber} of type {TypeParam} return " + (obj.IsOpen ? "opened" : "closed"), obj.ChannelNumber, typeof(TModel));
+                }
+            }
+
+            if (this.doNotRetain)
             {
                 obj.Dispose();
             }
 
-            base.Return(obj);
+            this.inner.Return(obj);
+        }
+
+        public override IModel Get()
+        {
+            var obj = this.inner.Get();
+
+            if (logger != null)
+            {
+                LogLevel logLevel = obj.IsOpen
+                    ? Logging.ModelObjectPool.GetOpenedModelEventLevel
+                    : Logging.ModelObjectPool.GetClosedModelEventLevel;
+
+                if (logger.IsEnabled(logLevel))
+                {
+                    EventId eventId = obj.IsOpen
+                        ? Logging.ModelObjectPool.GetOpenedModelEventId
+                        : Logging.ModelObjectPool.GetClosedModelEventId;
+
+                    logger.Log(logLevel, eventId, "Model {ChannelNumber} of type {TypeParam} get " + (obj.IsOpen ? "opened" : "closed"), obj.ChannelNumber, typeof(TModel));
+                }
+            }
+
+            return obj;
+        }
+
+        public void Dispose()
+        {
+            (this.inner as IDisposable)?.Dispose();
         }
     }
 }

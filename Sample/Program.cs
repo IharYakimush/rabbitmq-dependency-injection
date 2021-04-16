@@ -41,7 +41,8 @@ namespace Sample
                     });
 
                     services.AddHostedService<Producer>();
-                    services.AddHostedService<Consumer>();
+
+                    services.AddRabbitMqConsumerHostingService<RabbitMqSetup.Queue1, ConsumerHandler>();
 
                 }).Build().Run();
         }
