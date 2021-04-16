@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
-using RabbitMQ.DependencyInjection;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using RabbitMQ.Client;
+using RabbitMQ.DependencyInjection;
 
 namespace Sample
 {
@@ -28,18 +30,18 @@ namespace Sample
                 IModel model = null;
                 try
                 {
-                    model = excObjectPool.Get();
+                    model = this.excObjectPool.Get();
                     model.BasicPublish(RabbitMqSetup.Exc1.Name, "routingKey", false, null, Encoding.UTF8.GetBytes(value));
 
-                    logger.LogInformation("Published {value}", value);
+                    this.logger.LogInformation("Published {value}", value);
                 }
                 catch (Exception exc)
                 {
-                    logger.LogError(exc, "Exception");
+                    this.logger.LogError(exc, "Exception");
                 }
                 finally
                 {
-                    excObjectPool.Return(model);
+                    this.excObjectPool.Return(model);
                 }
 
                 await Task.Delay(5000, stoppingToken);

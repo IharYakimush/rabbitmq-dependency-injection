@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Linq;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
-using System.Linq;
 
 namespace RabbitMQ.DependencyInjection
 {
@@ -127,7 +129,7 @@ namespace RabbitMQ.DependencyInjection
 
             services.Add(new ServiceDescriptor(typeof(RabbitMqModelsObjectPool<TModel>), sp =>
             {
-                ModelPoolPolicy<TModel, TConnection> policy = new ModelPoolPolicy<TModel, TConnection>(
+                var policy = new ModelPoolPolicy<TModel, TConnection>(
                     sp.GetRequiredService<IRabbitMqConnection<TConnection>>(),
                     sp.GetService<ILoggerFactory>(),
                     (m) => modelBootstrapAction(sp, m));

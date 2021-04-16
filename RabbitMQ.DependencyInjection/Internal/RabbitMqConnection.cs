@@ -1,5 +1,6 @@
-﻿using RabbitMQ.Client;
-using System;
+﻿using System;
+
+using RabbitMQ.Client;
 
 namespace RabbitMQ.DependencyInjection
 {
@@ -9,27 +10,27 @@ namespace RabbitMQ.DependencyInjection
 
         public RabbitMqConnection(IConnection connection)
         {
-            Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
         public IConnection Connection { get; }
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
                 if (disposing)
                 {
-                    Connection.Dispose();
+                    this.Connection.Dispose();
                 }
 
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 
         public void Dispose()
         {
-            Dispose(disposing: true);
+            this.Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
     }

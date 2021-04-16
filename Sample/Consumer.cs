@@ -1,12 +1,14 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using RabbitMQ.DependencyInjection;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RabbitMQ.DependencyInjection;
 
 namespace Sample
 {
@@ -24,18 +26,18 @@ namespace Sample
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(queue.Model);
-            consumer.Received += ConsumerReceived;
-            tag = queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
+            var consumer = new AsyncEventingBasicConsumer(this.queue.Model);
+            consumer.Received += this.ConsumerReceived;
+            this.tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
 
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            if (queue.Model.IsOpen)
+            if (this.queue.Model.IsOpen)
             {
-                queue.Model.BasicCancelNoWait(tag);
+                this.queue.Model.BasicCancelNoWait(this.tag);
             }
 
             return Task.CompletedTask;
@@ -43,7 +45,7 @@ namespace Sample
 
         private Task ConsumerReceived(object sender, BasicDeliverEventArgs msg)
         {
-            logger.LogInformation("Recieved {value}", Encoding.UTF8.GetString(msg.Body.ToArray()));
+            this.logger.LogInformation("Recieved {value}", Encoding.UTF8.GetString(msg.Body.ToArray()));
 
             return Task.CompletedTask;
         }

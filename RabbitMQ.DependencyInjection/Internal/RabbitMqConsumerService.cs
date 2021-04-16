@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Hosting;
-using RabbitMQ.Client;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Hosting;
+
+using RabbitMQ.Client;
 
 namespace RabbitMQ.DependencyInjection
 {
@@ -21,22 +23,22 @@ namespace RabbitMQ.DependencyInjection
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            model = models.Get();
-            tag = handler.BasicConsume(model);
+            this.model = this.models.Get();
+            this.tag = this.handler.BasicConsume(this.model);
 
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            if (model != null && model.IsOpen && tag != null)
+            if (this.model != null && this.model.IsOpen && this.tag != null)
             {
-                model.BasicCancel(tag);
+                this.model.BasicCancel(this.tag);
             }
 
-            models.Return(model);
-            model = null;
-            tag = null;
+            this.models.Return(this.model);
+            this.model = null;
+            this.tag = null;
 
             return Task.CompletedTask;
         }
