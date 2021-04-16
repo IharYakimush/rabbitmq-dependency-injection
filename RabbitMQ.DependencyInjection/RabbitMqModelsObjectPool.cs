@@ -20,12 +20,12 @@ namespace RabbitMQ.DependencyInjection
             inner = (ObjectPool<IModel>)Activator.CreateInstance(innerType.MakeGenericType(typeof(IModel)), policy, maximumRetained <= 0 ? 1 : maximumRetained);
 
             // workaround because not possible to create object pool with capacity < 1
-            this.doNotRetain = maximumRetained <= 0;
+            doNotRetain = maximumRetained <= 0;
 
 
             if (loggerFactory != null)
             {
-                this.logger = loggerFactory.CreateLogger(Logging.ModelObjectPool.CategoryName);
+                logger = loggerFactory.CreateLogger(Logging.ModelObjectPool.CategoryName);
             }
         }
 
@@ -44,25 +44,25 @@ namespace RabbitMQ.DependencyInjection
 
                 if (logger.IsEnabled(logLevel))
                 {
-                    EventId eventId = obj.IsOpen 
-                        ? Logging.ModelObjectPool.ReturningOpenedModelEventId 
+                    EventId eventId = obj.IsOpen
+                        ? Logging.ModelObjectPool.ReturningOpenedModelEventId
                         : Logging.ModelObjectPool.ReturningClosedModelEventId;
 
                     logger.Log(logLevel, eventId, "Model {ChannelNumber} of type {TypeParam} return " + (obj.IsOpen ? "opened" : "closed"), obj.ChannelNumber, typeof(TModel));
                 }
             }
 
-            if (this.doNotRetain)
+            if (doNotRetain)
             {
                 obj.Dispose();
             }
 
-            this.inner.Return(obj);
+            inner.Return(obj);
         }
 
         public override IModel Get()
         {
-            var obj = this.inner.Get();
+            IModel obj = inner.Get();
 
             if (logger != null)
             {
@@ -85,7 +85,7 @@ namespace RabbitMQ.DependencyInjection
 
         public void Dispose()
         {
-            (this.inner as IDisposable)?.Dispose();
+            (inner as IDisposable)?.Dispose();
         }
     }
 }

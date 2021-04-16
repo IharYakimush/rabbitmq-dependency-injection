@@ -28,18 +28,18 @@ namespace Sample
                 IModel model = null;
                 try
                 {
-                    model = this.excObjectPool.Get();
+                    model = excObjectPool.Get();
                     model.BasicPublish(RabbitMqSetup.Exc1.Name, "routingKey", false, null, Encoding.UTF8.GetBytes(value));
 
-                    this.logger.LogInformation("Published {value}", value);
+                    logger.LogInformation("Published {value}", value);
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
-                    this.logger.LogError(exc, "Exception");
+                    logger.LogError(exc, "Exception");
                 }
                 finally
                 {
-                    this.excObjectPool.Return(model);
+                    excObjectPool.Return(model);
                 }
 
                 await Task.Delay(5000, stoppingToken);

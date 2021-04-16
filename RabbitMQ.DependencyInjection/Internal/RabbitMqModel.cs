@@ -22,7 +22,7 @@ namespace RabbitMQ.DependencyInjection
                     throw new ObjectDisposedException(typeof(RabbitMqModel<TModel>).Name);
                 }
 
-                return this.model ?? (this.model = this.models.Get());
+                return model ?? (model = models.Get());
             }
         }
 
@@ -32,13 +32,13 @@ namespace RabbitMQ.DependencyInjection
             {
                 if (disposing)
                 {
-                    if (this.model != null)
+                    if (model != null)
                     {
-                        this.models.Return(this.model);
+                        models.Return(model);
                     }
                 }
 
-                this.model = null;
+                model = null;
 
                 disposedValue = true;
             }

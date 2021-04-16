@@ -24,18 +24,18 @@ namespace Sample
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.queue.Model);
+            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(queue.Model);
             consumer.Received += ConsumerReceived;
-            this.tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
+            tag = queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
 
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            if (this.queue.Model.IsOpen)
+            if (queue.Model.IsOpen)
             {
-                this.queue.Model.BasicCancelNoWait(tag);
+                queue.Model.BasicCancelNoWait(tag);
             }
 
             return Task.CompletedTask;
@@ -43,7 +43,7 @@ namespace Sample
 
         private Task ConsumerReceived(object sender, BasicDeliverEventArgs msg)
         {
-            this.logger.LogInformation("Recieved {value}", Encoding.UTF8.GetString(msg.Body.ToArray()));
+            logger.LogInformation("Recieved {value}", Encoding.UTF8.GetString(msg.Body.ToArray()));
 
             return Task.CompletedTask;
         }

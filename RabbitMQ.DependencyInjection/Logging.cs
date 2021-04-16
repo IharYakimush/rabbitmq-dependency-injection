@@ -56,7 +56,7 @@ namespace RabbitMQ.DependencyInjection
             public static LogLevel BasicAcksEventLevel = LogLevel.Debug;
 
             public static EventId BasicNacksEventId = new EventId(209, "ModelBasicNacks");
-            public static LogLevel BasicNacksEventLevel = LogLevel.Debug;            
+            public static LogLevel BasicNacksEventLevel = LogLevel.Debug;
         }
 
         public static class ModelObjectPool

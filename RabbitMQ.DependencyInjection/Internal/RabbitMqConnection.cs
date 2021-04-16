@@ -9,7 +9,7 @@ namespace RabbitMQ.DependencyInjection
 
         public RabbitMqConnection(IConnection connection)
         {
-            this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            Connection = connection ?? throw new ArgumentNullException(nameof(connection));
         }
 
         public IConnection Connection { get; }
@@ -20,7 +20,7 @@ namespace RabbitMQ.DependencyInjection
             {
                 if (disposing)
                 {
-                    this.Connection.Dispose();
+                    Connection.Dispose();
                 }
 
                 disposedValue = true;

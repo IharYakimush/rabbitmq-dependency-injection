@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace RabbitMQ.DependencyInjection
 {
-    public interface IConsumerHandler
-    {
-        string BasicConsume(IModel model);
-    }
-
-    public class RabbitMqConsumerService<TModel,THandler> : IHostedService where THandler : class, IConsumerHandler
+    internal sealed class RabbitMqConsumerService<TModel, THandler> : IHostedService where THandler : class, IConsumerHandler
     {
         private readonly RabbitMqModelsObjectPool<TModel> models;
         private readonly THandler handler;
@@ -21,27 +16,27 @@ namespace RabbitMQ.DependencyInjection
         public RabbitMqConsumerService(RabbitMqModelsObjectPool<TModel> models, THandler handler)
         {
             this.models = models ?? throw new ArgumentNullException(nameof(models));
-            this.handler = handler ?? throw new ArgumentNullException(nameof(handler)); 
+            this.handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            this.model = models.Get();
-            this.tag = this.handler.BasicConsume(this.model);
+            model = models.Get();
+            tag = handler.BasicConsume(model);
 
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            if (this.model!=null && this.model.IsOpen && this.tag != null)
+            if (model != null && model.IsOpen && tag != null)
             {
-                this.model.BasicCancel(this.tag);
+                model.BasicCancel(tag);
             }
 
-            this.models.Return(this.model);
-            this.model = null;
-            this.tag = null;
+            models.Return(model);
+            model = null;
+            tag = null;
 
             return Task.CompletedTask;
         }
