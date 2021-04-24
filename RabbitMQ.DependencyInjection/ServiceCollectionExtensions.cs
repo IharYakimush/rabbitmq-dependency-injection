@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Linq;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System;
-using System.Linq;
 
 namespace RabbitMQ.DependencyInjection
 {
@@ -51,8 +54,8 @@ namespace RabbitMQ.DependencyInjection
                      catch (Exception exception)
                      {
                          logger?.Log(
-                             Logging.Connection.FactoryExceptionEventLevel, 
-                             Logging.Connection.FactoryExceptionEventId, exception, 
+                             Logging.Connection.FactoryExceptionEventLevel,
+                             Logging.Connection.FactoryExceptionEventId, exception,
                              "Connection of type {TypeParam} factory setup exception", typeof(TConnection));
 
                          throw;
@@ -65,8 +68,8 @@ namespace RabbitMQ.DependencyInjection
                      catch (Exception exception)
                      {
                          logger?.Log(
-                             Logging.Connection.CreateExceptionEventLevel, 
-                             Logging.Connection.CreateExceptionEventId, exception, 
+                             Logging.Connection.CreateExceptionEventLevel,
+                             Logging.Connection.CreateExceptionEventId, exception,
                              "Connection of type {TypeParam} create exception", typeof(TConnection));
 
                          throw;
@@ -112,7 +115,7 @@ namespace RabbitMQ.DependencyInjection
                 throw new ArgumentNullException(nameof(modelBootstrapAction));
             }
 
-            var connectionDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IRabbitMqConnection<TConnection>));
+            ServiceDescriptor connectionDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IRabbitMqConnection<TConnection>));
 
             if (connectionDescriptor == null)
             {
@@ -131,10 +134,41 @@ namespace RabbitMQ.DependencyInjection
                     sp.GetService<ILoggerFactory>(),
                     (m) => modelBootstrapAction(sp, m));
 
-                return new RabbitMqModelsObjectPool<TModel>(policy, modelsPoolMaxRetained);
+                return new RabbitMqModelsObjectPool<TModel>(sp.GetService<ILoggerFactory>(), policy, modelsPoolMaxRetained);
             }, connectionDescriptor.Lifetime));
 
             services.AddTransient<IRabbitMqModel<TModel>, RabbitMqModel<TModel>>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Register hosted service which will subscribe for queue and manage message processing
+        /// </summary>
+        /// <typeparam name="TModel">Type param to reference previously registered model where queue should be declared.</typeparam>
+        /// <typeparam name="THandler">Type param to reference handler derived from <see cref="IConsumerHandler"/> which going to process messages</typeparam>
+        /// <param name="services">The <see cref="IServiceCollection"/> to register with.</param>
+        /// <returns>The original <see cref="IServiceCollection"/></returns>
+        public static IServiceCollection AddRabbitMqConsumerHostingService<TModel, THandler>(
+            this IServiceCollection services) where THandler : class, IConsumerHandler
+        {
+            services.TryAddTransient<THandler>();
+
+            ServiceDescriptor modelDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(RabbitMqModelsObjectPool<TModel>));
+
+            if (modelDescriptor == null)
+            {
+                throw new InvalidOperationException($"Model with type param {typeof(TModel)} should be registered first");
+            }
+
+            ServiceDescriptor serviceDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(RabbitMqConsumerService<RabbitMqModelsObjectPool<TModel>, THandler>));
+
+            if (serviceDescriptor != null)
+            {
+                throw new InvalidOperationException($"Consumer with model type param {typeof(TModel)} and handler type param {typeof(THandler)} already added");
+            }
+
+            services.AddHostedService<RabbitMqConsumerService<TModel, THandler>>();
 
             return services;
         }

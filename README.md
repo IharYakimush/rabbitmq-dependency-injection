@@ -39,7 +39,7 @@ private static void Main(string[] args)
         });
 
         services.AddHostedService<Producer>();
-        services.AddHostedService<Consumer>();
+        services.AddRabbitMqConsumerHostingService<RabbitMqSetup.Queue1, ConsumerHandler>();
 
     }).Build().Run();
 }
@@ -103,49 +103,44 @@ class Producer : BackgroundService
 ```
 ### 4. Second option of model usage
 Inject `IRabbitMqModel<TModel>` interface. It is registered in container with Transient lifetime and when needed created from same ObjectPool described in section 3. Don't dispose model in your code to allow it returning to object pool automatically. 
-Sample of message consumer with this approach:
+Sample of controller with this approach:
 ```
-internal class Consumer : IHostedService
+[ApiController]
+[Route("[controller]")]
+public class WeatherForecastController : ControllerBase
 {
-    private readonly IRabbitMqModel<RabbitMqSetup.Queue1> queue;
-    private readonly ILogger<Consumer> logger;
-    private string tag = null;
+    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly IRabbitMqModel<WeatherForecast> _rabbitMqModel;
 
-    public Consumer(IRabbitMqModel<RabbitMqSetup.Queue1> queue, ILogger<Consumer> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IRabbitMqModel<WeatherForecast> rabbitMqModel)
     {
-        this.queue = queue ?? throw new ArgumentNullException(nameof(queue));
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+        _logger = logger;
+        _rabbitMqModel = rabbitMqModel ?? throw new ArgumentNullException(nameof(rabbitMqModel));
+    } 
+}
+```
+### Consumer handler
+You can develop only message processing custom logic and host it in background service. 
+Implement `IConsumerHandler` interface or one of `AsyncEventingHandler` or `EventingHandler` abstract classes.
+```
+public class ConsumerHandler : AsyncEventingHandler
+{
+    public override string QueueName => RabbitMqSetup.Queue1.Name;
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public override bool AutoAck => true;
+
+    protected override Task HandleMessageAsync(AsyncEventingBasicConsumer consumer, BasicDeliverEventArgs msg)
     {
-        AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.queue.Model);
-        consumer.Received += ConsumerReceived;
-        this.tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        if (this.queue.Model.IsOpen)
-        {
-            this.queue.Model.BasicCancelNoWait(tag);
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private Task ConsumerReceived(object sender, BasicDeliverEventArgs msg)
-    {
-        this.logger.LogInformation("Recieved {value}", Encoding.UTF8.GetString(msg.Body.ToArray()));
+        Console.WriteLine($"Recieved {Encoding.UTF8.GetString(msg.Body.ToArray())}");
 
         return Task.CompletedTask;
     }
 }
 ```
+and register using `services.AddRabbitMqConsumerHostingService<RabbitMqSetup.Queue1, ConsumerHandler>();`
+
 # Logging
-If `ILoggerFactory` available in container following events will be logged. You can change default logging category and events level using `RabbitMQ.DependencyInjection.Logging` class.
+If `ILoggerFactory` available in container following events will be logged.
 ### Default events
 
 | Catgory | Event Name | Log Level | Comments |
@@ -165,8 +160,14 @@ RabbitMQ.Model | ModelCreateException | Error | - |
 RabbitMQ.Model | ModelBasicReturn | Debug | - |
 RabbitMQ.Model | ModelBasicAcks | Debug | - |
 RabbitMQ.Model | ModelBasicNacks | Debug | - |
-
-
+RabbitMQ.ModelsObjectPool | ReturningOpenedModel | Debug | Returing model in opened state to object pool |
+RabbitMQ.ModelsObjectPool | ReturningClosedModel | Debug | Returing model in closed state to object pool |
+RabbitMQ.ModelsObjectPool | GetOpenedModel | Debug | Obtained model in opened state from object pool |
+RabbitMQ.ModelsObjectPool | GetClosedModel | Warning | Obtained model in closed state from object pool |
+RabbitMQ.ConsumerService | Starting | Information | - |
+RabbitMQ.ConsumerService | Started | Information | - |
+RabbitMQ.ConsumerService | Failure | Critical | - |
+RabbitMQ.ConsumerService | Stoping | Information | - |
 
 ### Console output sample:
 ```
@@ -192,3 +193,4 @@ dbug: RabbitMQ.Model[204]
       Model 2 of type Sample.RabbitMqSetup+Queue1 shutdown. Application 200 Connection close forced (null)
 ```
 # NuGet
+https://www.nuget.org/packages/RabbitMQ.DependencyInjection

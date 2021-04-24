@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
-using RabbitMQ.DependencyInjection;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using RabbitMQ.Client;
+using RabbitMQ.DependencyInjection;
 
 namespace Sample
 {
@@ -32,6 +34,10 @@ namespace Sample
                     model.BasicPublish(RabbitMqSetup.Exc1.Name, "routingKey", false, null, Encoding.UTF8.GetBytes(value));
 
                     this.logger.LogInformation("Published {value}", value);
+                }
+                catch (Exception exc)
+                {
+                    this.logger.LogError(exc, "Exception");
                 }
                 finally
                 {

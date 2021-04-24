@@ -1,12 +1,14 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using RabbitMQ.DependencyInjection;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RabbitMQ.DependencyInjection;
 
 namespace Sample
 {
@@ -24,8 +26,8 @@ namespace Sample
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.queue.Model);
-            consumer.Received += ConsumerReceived;
+            var consumer = new AsyncEventingBasicConsumer(this.queue.Model);
+            consumer.Received += this.ConsumerReceived;
             this.tag = this.queue.Model.BasicConsume(RabbitMqSetup.Queue1.Name, true, consumer);
 
             return Task.CompletedTask;
@@ -35,7 +37,7 @@ namespace Sample
         {
             if (this.queue.Model.IsOpen)
             {
-                this.queue.Model.BasicCancelNoWait(tag);
+                this.queue.Model.BasicCancelNoWait(this.tag);
             }
 
             return Task.CompletedTask;
