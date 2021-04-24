@@ -164,8 +164,10 @@ RabbitMQ.ModelsObjectPool | ReturningOpenedModel | Debug | Returing model in ope
 RabbitMQ.ModelsObjectPool | ReturningClosedModel | Debug | Returing model in closed state to object pool |
 RabbitMQ.ModelsObjectPool | GetOpenedModel | Debug | Obtained model in opened state from object pool |
 RabbitMQ.ModelsObjectPool | GetClosedModel | Warning | Obtained model in closed state from object pool |
-
-
+RabbitMQ.ConsumerService | Starting | Information | - |
+RabbitMQ.ConsumerService | Started | Information | - |
+RabbitMQ.ConsumerService | Failure | Critical | - |
+RabbitMQ.ConsumerService | Stoping | Information | - |
 
 ### Console output sample:
 ```

@@ -100,6 +100,17 @@ namespace RabbitMQ.DependencyInjection
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            if (this.logger != null && this.logger.IsEnabled(Logging.ConsumerService.StopingEventLevel))
+            {
+                this.logger.Log(Logging.ConsumerService.StopingEventLevel,
+                    Logging.ConsumerService.StopingEventId,
+                    "Consumer service for handler of type {HandlerTypeParam} and model {ChannelNumber} of type {TypeParam} stoping. ConsumerTag {ConsumerTag}",
+                    typeof(THandler),
+                    this.model.ChannelNumber,
+                    typeof(TModel),
+                    this.tag);
+            }
+
             this.stopping = true;
 
             if (this.model != null && this.model.IsOpen && this.tag != null)

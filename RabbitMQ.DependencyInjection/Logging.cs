@@ -88,6 +88,9 @@ namespace RabbitMQ.DependencyInjection
 
             public static EventId FailureEventId { get; } = new EventId(403, "Failure");
             public static LogLevel FailureEventLevel { get; } = LogLevel.Critical;
+
+            public static EventId StopingEventId { get; } = new EventId(404, "Stoping");
+            public static LogLevel StopingEventLevel { get; } = LogLevel.Information;
         }
     }
 }
