@@ -1,26 +1,27 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace RabbitMQ.DependencyInjection
 {
-    public abstract class EventingHandler : IConsumerHandler
+    public abstract class AsyncEventingHandler : IConsumerHandler
     {
         public string BasicConsume(IModel model)
         {
-            var consumer = new EventingBasicConsumer(model);
+            var consumer = new AsyncEventingBasicConsumer(model);
             consumer.Received += this.Received;
 
             return model.BasicConsume(consumer, this.QueueName, this.AutoAck, this.ConsumerTag, this.NoLocal, this.Exclusive, this.Arguments);
         }
 
-        private void Received(object sender, BasicDeliverEventArgs msg)
+        private Task Received(object sender, BasicDeliverEventArgs msg)
         {
-            this.HandleMessage((EventingBasicConsumer)sender, msg);
+            return this.HandleMessageAsync((AsyncEventingBasicConsumer)sender, msg);
         }
 
-        public abstract void HandleMessage(EventingBasicConsumer consumer, BasicDeliverEventArgs msg);
+        public abstract Task HandleMessageAsync(AsyncEventingBasicConsumer consumer, BasicDeliverEventArgs msg);
         public abstract string QueueName { get; }
         public abstract bool AutoAck { get; }
         public virtual bool NoLocal { get; } = false;

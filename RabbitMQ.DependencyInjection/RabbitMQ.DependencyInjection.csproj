@@ -5,16 +5,18 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Authors>Ihar Yakimush</Authors>
-    <Description>Register multiple instances of IConnection in service collection. Maintain 1 connection per application and 1 model per thread approach. ObjectPool to access IModel.</Description>
+    <Description>Register multiple instances of IConnection in service collection. Maintain 1 connection per application and 1 model per thread approach. ObjectPool to access IModel. Background service to process messages</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/IharYakimush/rabbitmq-dependency-injection</PackageProjectUrl>
     <PackageId>RabbitMQ.DependencyInjection</PackageId>
     <PackageTags>rabbitmq dependency-injection</PackageTags>
     <Product>RabbitMQ.DependencyInjection</Product>
     <RepositoryUrl>https://github.com/IharYakimush/rabbitmq-dependency-injection</RepositoryUrl>
-    <Version>1.6201.3000</Version>
+    <Version>2.6201.3000</Version>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>5.0</AnalysisLevel>
+    <PackageReleaseNotes>Added background service to host message processing logic. Added logging to object pool.
+BREAKING CHANGES: logging category, event names, and event levels now readonly</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
