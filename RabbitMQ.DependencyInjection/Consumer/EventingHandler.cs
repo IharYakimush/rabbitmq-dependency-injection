@@ -7,7 +7,7 @@ namespace RabbitMQ.DependencyInjection
 {
     public abstract class EventingHandler : IConsumerHandler
     {
-        public string BasicConsume(IModel model)
+        public virtual string BasicConsume(IModel model)
         {
             var consumer = new EventingBasicConsumer(model);
             consumer.Received += this.Received;
@@ -20,7 +20,7 @@ namespace RabbitMQ.DependencyInjection
             this.HandleMessage((EventingBasicConsumer)sender, msg);
         }
 
-        public abstract void HandleMessage(EventingBasicConsumer consumer, BasicDeliverEventArgs msg);
+        protected abstract void HandleMessage(EventingBasicConsumer consumer, BasicDeliverEventArgs msg);
         public abstract string QueueName { get; }
         public abstract bool AutoAck { get; }
         public virtual bool NoLocal { get; } = false;

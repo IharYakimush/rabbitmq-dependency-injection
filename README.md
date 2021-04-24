@@ -121,7 +121,7 @@ public class WeatherForecastController : ControllerBase
 ```
 ### Consumer handler
 You can develop only message processing custom logic and host it in background service. 
-Implement `IConsumerHandler` interface or one of `AsyncEventingHandler or `EventingHandler` abstract classes.
+Implement `IConsumerHandler` interface or one of `AsyncEventingHandler` or `EventingHandler` abstract classes.
 ```
 public class ConsumerHandler : AsyncEventingHandler
 {
@@ -129,7 +129,7 @@ public class ConsumerHandler : AsyncEventingHandler
 
     public override bool AutoAck => true;
 
-    public override Task HandleMessageAsync(AsyncEventingBasicConsumer consumer, BasicDeliverEventArgs msg)
+    protected override Task HandleMessageAsync(AsyncEventingBasicConsumer consumer, BasicDeliverEventArgs msg)
     {
         Console.WriteLine($"Recieved {Encoding.UTF8.GetString(msg.Body.ToArray())}");
 

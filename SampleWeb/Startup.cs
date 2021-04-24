@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 using RabbitMQ.Client;
 using RabbitMQ.DependencyInjection;
@@ -35,7 +29,8 @@ namespace SampleWeb
                             Endpoint = new AmqpTcpEndpoint("localhost", 5672),
                             UserName = "myUser",
                             Password = "myPass",
-                            DispatchConsumersAsync = false
+                            DispatchConsumersAsync = false,
+                            AutomaticRecoveryEnabled = false
                         }
                     );
 

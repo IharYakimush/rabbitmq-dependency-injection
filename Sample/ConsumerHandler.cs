@@ -13,7 +13,7 @@ namespace Sample
 
         public override bool AutoAck => true;
 
-        public override Task HandleMessageAsync(AsyncEventingBasicConsumer consumer, BasicDeliverEventArgs msg)
+        protected override Task HandleMessageAsync(AsyncEventingBasicConsumer consumer, BasicDeliverEventArgs msg)
         {
             Console.WriteLine($"Recieved {Encoding.UTF8.GetString(msg.Body.ToArray())}");
 

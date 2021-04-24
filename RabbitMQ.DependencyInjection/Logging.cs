@@ -75,5 +75,19 @@ namespace RabbitMQ.DependencyInjection
             public static EventId GetClosedModelEventId { get; } = new EventId(304, "GetClosedModel");
             public static LogLevel GetClosedModelEventLevel { get; } = LogLevel.Warning;
         }
+
+        public static class ConsumerService
+        {
+            public const string CategoryName = "RabbitMQ.ConsumerService";
+
+            public static EventId StartingEventId { get; } = new EventId(401, "Starting");
+            public static LogLevel StartingEventLevel { get; } = LogLevel.Information;
+
+            public static EventId StartedEventId { get; } = new EventId(402, "Started");
+            public static LogLevel StartedEventLevel { get; } = LogLevel.Information;
+
+            public static EventId FailureEventId { get; } = new EventId(403, "Failure");
+            public static LogLevel FailureEventLevel { get; } = LogLevel.Critical;
+        }
     }
 }
